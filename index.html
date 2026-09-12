@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startup Pitch Arena</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- QRCode JS Library for local client-side QR generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+    <!-- 3D AMBIENT BACKGROUND ORBS -->
+    <div class="bg-ambient">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo">PITCH ARENA</div>
+        <div class="nav-links">
+            <button class="theme-toggle-btn" id="themeToggleBtn" type="button" aria-label="Toggle Theme">🌙 Dark</button>
+            <button class="submit-nav-btn" id="openSubmitModalBtn" type="button">+ Pitch Startup</button>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="hero">
+        <h1>Startup Pitch Arena</h1>
+        <p>Discover innovative ideas, support founders, and vote for your favorite startups.</p>
+
+        <!-- ANALYTICS SUMMARY BAR -->
+        <div class="analytics-bar">
+            <div class="stat-item"><span class="stat-number" id="totalStartupsStat">0</span><span class="stat-label">Startups</span></div>
+            <div class="stat-item"><span class="stat-number" id="totalVotesStat">0</span><span class="stat-label">Total Votes</span></div>
+            <div class="stat-item"><span class="stat-number" id="topCategoryStat">-</span><span class="stat-label">Top Category</span></div>
+        </div>
+
+        <!-- SEARCH & SORT CONTROLS -->
+        <div class="controls-row">
+            <input type="text" id="searchInput" placeholder="Search startups or keywords...">
+            <select id="sortSelect" class="sort-select">
+                <option value="votes-desc">🔥 Most Voted</option>
+                <option value="newest">🆕 Newest First</option>
+                <option value="oldest">⏳ Oldest First</option>
+            </select>
+        </div>
+
+        <!-- CATEGORY FILTERS -->
+        <div class="categories" id="categoryContainer">
+            <button class="category-btn active" data-category="All">All</button>
+            <button class="category-btn" data-category="AI">AI</button>
+            <button class="category-btn" data-category="FinTech">FinTech</button>
+            <button class="category-btn" data-category="HealthTech">HealthTech</button>
+            <button class="category-btn" data-category="CleanTech">CleanTech</button>
+            <button class="category-btn" data-category="EdTech">EdTech</button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="container">
+        <div class="startup-grid" id="startupGrid"></div>
+
+        <!-- PAGINATION CONTROLS -->
+        <div class="pagination-container" id="paginationContainer">
+            <button id="prevPageBtn" class="page-btn">← Prev</button>
+            <span id="pageIndicator" class="page-indicator">Page 1 of 1</span>
+            <button id="nextPageBtn" class="page-btn">Next →</button>
+        </div>
+    </main>
+
+    <!-- CARD DETAIL MODAL -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose" type="button">&times;</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- SUBMIT STARTUP MODAL -->
+    <div class="modal-overlay" id="submitModalOverlay">
+        <div class="modal-content">
+            <button class="modal-close" id="submitModalClose" type="button">&times;</button>
+            <h2 style="margin-bottom: 1rem; color: var(--text-primary);">Pitch Your Startup</h2>
+            <form id="submitStartupForm">
+                <div class="form-group">
+                    <label for="inputTitle">Startup Name</label>
+                    <input type="text" id="inputTitle" required placeholder="e.g. EcoPulse">
+                </div>
+                <div class="form-group">
+                    <label for="inputCategory">Category</label>
+                    <select id="inputCategory" required>
+                        <option value="AI">AI</option>
+                        <option value="FinTech">FinTech</option>
+                        <option value="HealthTech">HealthTech</option>
+                        <option value="CleanTech">CleanTech</option>
+                        <option value="EdTech">EdTech</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="inputDesc">Tagline / Short Pitch</label>
+                    <input type="text" id="inputDesc" required placeholder="Brief summary of your idea...">
+                </div>
+                <div class="form-group">
+                    <label for="inputFounder">Founder Name</label>
+                    <input type="text" id="inputFounder" required placeholder="e.g. Alex Rivera">
+                </div>
+                <div class="form-group">
+                    <label for="inputDetails">Detailed Overview</label>
+                    <textarea id="inputDetails" rows="3" required placeholder="Full description..."></textarea>
+                </div>
+                <button type="submit" class="submit-form-btn">Submit Pitch</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
