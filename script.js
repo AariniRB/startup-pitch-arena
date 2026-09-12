@@ -31,7 +31,6 @@ const initialStartups = [
     }
 ];
 
-// LocalStorage Persistence
 function getStartups() {
     const stored = localStorage.getItem("pitch_arena_startups");
     return stored ? JSON.parse(stored) : initialStartups;
@@ -50,7 +49,6 @@ function saveVotedIds(ids) {
     localStorage.setItem("pitch_arena_voted", JSON.stringify(ids));
 }
 
-// Global Filter & Pagination State
 let activeCategory = "All";
 let searchQuery = "";
 let currentSort = "votes-desc";
@@ -58,7 +56,6 @@ let currentPage = 1;
 const ITEMS_PER_PAGE = 3;
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Element Bindings
     const startupGrid = document.getElementById("startupGrid");
     const searchInput = document.getElementById("searchInput");
     const sortSelect = document.getElementById("sortSelect");
@@ -78,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitModalClose = document.getElementById("submitModalClose");
     const submitStartupForm = document.getElementById("submitStartupForm");
 
-    // 1. Theme Toggle Logic
+    // Dynamic Light / Dark Mode Toggle
     const savedTheme = localStorage.getItem("pitch_arena_theme") || "dark";
     if (savedTheme === "light") {
         document.body.classList.add("light-theme");
@@ -92,10 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("pitch_arena_theme", isLight ? "light" : "dark");
     };
 
-    // 2. Analytics Calculation
+    // Real-Time Analytics Bar
     function updateAnalytics(startups) {
         document.getElementById("totalStartupsStat").textContent = startups.length;
-        
         const totalVotes = startups.reduce((acc, curr) => acc + curr.votes, 0);
         document.getElementById("totalVotesStat").textContent = totalVotes;
 
@@ -105,12 +101,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("topCategoryStat").textContent = topCat;
     }
 
-    // 3. Render Cards & Pagination
+    // Render Function with Sorting & Pagination
     function renderGrid() {
         const startups = getStartups();
         updateAnalytics(startups);
 
-        // Filter
         let filtered = startups.filter(s => {
             const matchesCategory = (activeCategory === "All") || (s.category === activeCategory);
             const matchesSearch = s.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -118,12 +113,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return matchesCategory && matchesSearch;
         });
 
-        // Sort
         if (currentSort === "votes-desc") filtered.sort((a, b) => b.votes - a.votes);
         else if (currentSort === "newest") filtered.sort((a, b) => b.timestamp - a.timestamp);
         else if (currentSort === "oldest") filtered.sort((a, b) => a.timestamp - b.timestamp);
 
-        // Pagination Calculations
         const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
         if (currentPage > totalPages) currentPage = totalPages;
 
@@ -135,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
         nextPageBtn.disabled = currentPage === totalPages;
 
         if (paginatedItems.length === 0) {
-            startupGrid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 3rem 0;">No startups found.</p>`;
+            startupGrid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem 0; font-weight:600;">No startups found.</p>`;
             return;
         }
 
@@ -163,11 +156,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }).join("");
     }
 
-    // Pagination Listeners
     prevPageBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderGrid(); } };
     nextPageBtn.onclick = () => { currentPage++; renderGrid(); };
 
-    // 4. Vote Handler
     window.handleVote = function(event, id) {
         event.stopPropagation();
         let startups = getStartups();
@@ -183,58 +174,46 @@ document.addEventListener("DOMContentLoaded", () => {
         renderGrid();
     };
 
-    // 5. Open Detail Modal with QR Code, Email Confirmation & Calendar Export
     window.openDetailModal = function(id) {
         const startups = getStartups();
         const startup = startups.find(s => s.id === id);
         if (!startup) return;
 
-        const pitchUrl = `${window.location.origin}${window.location.pathname}?id=${startup.id}`;
-        const emailSubject = encodeURIComponent(`Pitch Confirmation: ${startup.title}`);
-        const emailBody = encodeURIComponent(`Hi ${startup.founder},\n\nI just checked out your pitch "${startup.title}" on Startup Pitch Arena! Excellent work.\n\nLink: ${pitchUrl}`);
+        const pitchUrl = window.location.href;
+        const emailSubject = encodeURIComponent(`Pitch Details: ${startup.title}`);
+        const emailBody = encodeURIComponent(`Check out ${startup.title} by ${startup.founder} on Pitch Arena!`);
 
         modalBody.innerHTML = `
             <span class="category-badge">${startup.category}</span>
-            <h2 style="font-size: 1.8rem; margin: 0.5rem 0; color: var(--text-primary);">${startup.title}</h2>
-            <p style="color: var(--text-muted); margin-bottom: 0.5rem;">Founded by <strong>${startup.founder}</strong></p>
+            <h2 style="font-size: 1.8rem; margin: 0.5rem 0; color: var(--text-primary); font-weight: 800;">${startup.title}</h2>
+            <p style="color: var(--text-muted); margin-bottom: 0.75rem; font-weight: 600;">Founded by <strong style="color:var(--text-primary);">${startup.founder}</strong></p>
             <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem;">${startup.details}</p>
             
             <div style="text-align: center; margin-top: 1rem;">
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Scan QR code to share startup page</p>
+                <p style="font-size: 0.8rem; color: var(--text-muted); font-weight:700; margin-bottom: 0.5rem;">Scan QR to share</p>
                 <div class="qr-container" id="qrcode"></div>
             </div>
 
             <div class="action-buttons-group">
-                <a class="action-btn btn-email" href="mailto:?subject=${emailSubject}&body=${emailBody}">📧 Email Confirmation</a>
-                <button class="action-btn btn-calendar" onclick="downloadCalendarEvent('${startup.title}')">📅 Add Pitch Reminder</button>
+                <a class="action-btn btn-email" href="mailto:?subject=${emailSubject}&body=${emailBody}">📧 Share Email</a>
+                <button class="action-btn btn-calendar" onclick="downloadCalendarEvent('${startup.title}')">📅 Calendar Reminder</button>
             </div>
         `;
 
         modalOverlay.classList.add("active");
 
-        // Generate QR code dynamically
         setTimeout(() => {
             document.getElementById("qrcode").innerHTML = "";
             new QRCode(document.getElementById("qrcode"), {
                 text: pitchUrl,
-                width: 120,
-                height: 120
+                width: 110,
+                height: 110
             });
         }, 50);
     };
 
-    // Helper: Generate & Download iCal (.ics) Event Reminder File
     window.downloadCalendarEvent = function(title) {
-        const icsData = `BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-SUMMARY:Pitch Demo: ${title}
-DESCRIPTION:Reminder to review pitch demo details for ${title} on Startup Pitch Arena.
-DTSTART:20261001T100000Z
-DTEND:20261001T110000Z
-END:VEVENT
-END:VCALENDAR`;
-
+        const icsData = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Pitch Review: ${title}\nDESCRIPTION:Reminder to review pitch details for ${title}.\nDTSTART:20261001T100000Z\nDTEND:20261001T110000Z\nEND:VEVENT\nEND:VCALENDAR`;
         const blob = new Blob([icsData], { type: "text/calendar;charset=utf-8" });
         const link = document.createElement("a");
         link.href = window.URL.createObjectURL(blob);
@@ -244,16 +223,13 @@ END:VCALENDAR`;
         document.body.removeChild(link);
     };
 
-    // Modal Close Events
     if (modalClose) modalClose.onclick = () => modalOverlay.classList.remove("active");
     if (modalOverlay) modalOverlay.onclick = (e) => { if (e.target === modalOverlay) modalOverlay.classList.remove("active"); };
 
-    // Submit Modal Events
     if (openSubmitModalBtn) openSubmitModalBtn.onclick = () => submitModalOverlay.classList.add("active");
     if (submitModalClose) submitModalClose.onclick = () => submitModalOverlay.classList.remove("active");
     if (submitModalOverlay) submitModalOverlay.onclick = (e) => { if (e.target === submitModalOverlay) submitModalOverlay.classList.remove("active"); };
 
-    // New Startup Pitch Submission Handler
     if (submitStartupForm) {
         submitStartupForm.onsubmit = function(e) {
             e.preventDefault();
@@ -280,7 +256,6 @@ END:VCALENDAR`;
         };
     }
 
-    // Search & Sort Listeners
     if (searchInput) {
         searchInput.oninput = (e) => {
             searchQuery = e.target.value;
@@ -308,6 +283,5 @@ END:VCALENDAR`;
         };
     }
 
-    // Initial render
     renderGrid();
 });
